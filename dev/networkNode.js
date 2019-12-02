@@ -32,8 +32,12 @@ app.get('/mine', function(req, res){
 	const nonce = bitcoin.proofOfWork(prevBlockHash, currentBlockData);
 	const blockHash = bitcoin.hashBlock(prevBlockHash, currentBlockData, nonce);
 	
+<<<<<<< Updated upstream:dev/networkNode.js
 	bitcoin.createNewTransaction(12.5, "00", nodeAddress);
 	
+=======
+	bitcoin.createNewTransaction(12.5, "00", )
+>>>>>>> Stashed changes:dev/api.js
 	const newBlock = bitcoin.createNewBlock(nonce, prevBlockHash, blockHash);
 	res.json({
 		note: "New Block mined successfully",
