@@ -5,6 +5,7 @@ const blockchain = require('./blockchain');
 const uuid = require('uuid/v1');
 
 const port = process.argv[2];
+const rp = require('request-promise');
 
 const nodeAddress = uuid().split('-').join('');
 
@@ -32,17 +33,53 @@ app.get('/mine', function(req, res){
 	const nonce = bitcoin.proofOfWork(prevBlockHash, currentBlockData);
 	const blockHash = bitcoin.hashBlock(prevBlockHash, currentBlockData, nonce);
 	
-<<<<<<< Updated upstream:dev/networkNode.js
 	bitcoin.createNewTransaction(12.5, "00", nodeAddress);
-	
-=======
-	bitcoin.createNewTransaction(12.5, "00", )
->>>>>>> Stashed changes:dev/api.js
+
 	const newBlock = bitcoin.createNewBlock(nonce, prevBlockHash, blockHash);
 	res.json({
 		note: "New Block mined successfully",
 		block: newBlock
 	});
+});
+
+//register a node and broadcast that in the network
+app.post('/register-and-broadcast-node', function(req, res){
+	const newNodeUrl = req.body.newNodeUrl;
+	if (bitcoin.networkNodes.indexOf(newNodeUrl) == -1) bitcoin.networkNodes.push(newNodeUrl);
+	const registerNodesPromises = [];
+	bitcoin.networkNodes.forEach(networkNodeUrl => {
+		const requestOptions = {
+			uri: networkNodeUrl + '/register-node',
+			method: "POST",
+			body: { newNodeUrl : newNodeUrl },
+			json: true 
+		};
+
+		registerNodesPromises.push(rp(requestOptions));
+	});
+
+	Promise.all(registerNodesPromises)
+	.then(data => {
+		const bulkRegisterOptions = {
+			uri: newNodeUrl+ '/register-nodes-bulk',
+			method: 'POST',
+			body: { allNetworkNodes : [ ...bitcoin.networkNodes, bitcoin.currentNodeUrl ]},
+			json: true
+		};
+
+		return rp(bulkRegisterOptions);
+	});
+	.then(data => {
+		res.json({ note: 'New Node Registered with Network Successfully' });
+	});
+});
+
+app.post('/register-node', function(req, res){
+	
+});
+
+app.post('/register-nodes-bulk', function(req, res){
+	//
 });
 
 app.listen(port, function(){
