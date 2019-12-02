@@ -2,6 +2,9 @@ var express = require('express');
 var app = express();
 const bodyParser = require('body-parser');
 const blockchain = require('./blockchain');
+const uuid = require('uuid/v1');
+
+const nodeAddress = uuid().split('-').join('');
 
 bitcoin = new blockchain();
 
@@ -26,6 +29,8 @@ app.get('/mine', function(req, res){
 	};
 	const nonce = bitcoin.proofOfWork(prevBlockHash, currentBlockData);
 	const blockHash = bitcoin.hashBlock(prevBlockHash, currentBlockData, nonce);
+	
+	bitcoin.createNewTransaction(12.5, "00", nodeAddress);
 	
 	const newBlock = bitcoin.createNewBlock(nonce, prevBlockHash, blockHash);
 	res.json({
