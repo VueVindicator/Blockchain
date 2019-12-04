@@ -33,7 +33,7 @@ app.post('/transaction/broadcast', function(req, res){
 	const requestPromises = [];
 	bitcoin.networkNodes.forEach(networkNodeUrl => {
 		const requestOptions = {
-			uri: networkNodeUrl + 'transaction',
+			uri: networkNodeUrl + '/transaction',
 			method: 'POST', 
 			body: newTransaction,
 			json: true
