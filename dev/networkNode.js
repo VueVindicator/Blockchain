@@ -45,7 +45,7 @@ app.post('/transaction/broadcast', function(req, res){
 	Promise.all(requestPromises)
 	.then(data => {
 		res.json({ note: 'Transaction created and broadcast successfully' })
-	})
+	});
 });
 
 app.get('/mine', function(req, res){
@@ -69,7 +69,7 @@ app.get('/mine', function(req, res){
 			method: 'POST',
 			body: { newBlock : newBlock },
 			json: true
-		}
+		};
 
 		requestPromises.push(rp(requestOptions));
 	});
@@ -86,8 +86,10 @@ app.get('/mine', function(req, res){
 			},
 			json: true
 
-		}
+		};
+
 		return(rp(requestOptions));
+
 	})
 	.then(data => {
 		res.json({
@@ -97,8 +99,8 @@ app.get('/mine', function(req, res){
 	});
 });
 
-app.get('/receive-new-block', function(req, res){
-	const newBlock = req.body.newNodeUrl;
+app.post('/receive-new-block', function(req, res){
+	const newBlock = req.body.newBlock;
 	const lastBlock = bitocin.getLastBlock();
 	const correctHash = lastBlock.hash === newBlock.previousBlockHash;
 	const correctIndex = lastBlock['index'] + 1 === newBlock['index'];
@@ -117,7 +119,7 @@ app.get('/receive-new-block', function(req, res){
 		res.json({
 			note: 'New block rejected',
 			newBlock: newBlock
-		})
+		});
 	}
 });
 
@@ -148,7 +150,8 @@ app.post('/register-and-broadcast-node', function(req, res){
 		};
 
 		return rp(bulkRegisterOptions);
-	})
+	});
+	
 	.then(data => {
 		res.json({ note: 'New Node Registered with Network Successfully' });
 	});
