@@ -58,13 +58,66 @@ app.get('/mine', function(req, res){
 	const nonce = bitcoin.proofOfWork(prevBlockHash, currentBlockData);
 	const blockHash = bitcoin.hashBlock(prevBlockHash, currentBlockData, nonce);
 	
-	bitcoin.createNewTransaction(12.5, "00", nodeAddress);
+	//bitcoin.createNewTransaction(12.5, "00", nodeAddress);
 
 	const newBlock = bitcoin.createNewBlock(nonce, prevBlockHash, blockHash);
-	res.json({
-		note: "New Block mined successfully",
-		block: newBlock
+
+	const requestPromises = [];
+	bitcoin.networkNodes.forEach(networkNodeUrl => {
+		const requestOptions = {
+			url: networkNodeUrl + '/receive-new-block',
+			method: 'POST',
+			body: { newBlock : newBlock },
+			json: true
+		}
+
+		requestPromises.push(rp(requestOptions));
 	});
+
+	Promise.all(requestPromises)
+	.then(data => {
+		const requestOptions = {
+			uri: bitcoin.currentNodeUrl + '/transaction/broadcast',
+			method: 'POST',
+			body: {
+				amount: 12.5,
+				sender: "00",
+				recepient: nodeAddress
+			},
+			json: true
+
+		}
+		return(rp(requestOptions));
+	})
+	.then(data => {
+		res.json({
+			note: "New block mined and broadcast successfully",
+			block: newBlock
+		});
+	});
+});
+
+app.get('/receive-new-block', function(req, res){
+	const newBlock = req.body.newNodeUrl;
+	const lastBlock = bitocin.getLastBlock();
+	const correctHash = lastBlock.hash === newBlock.prevBlockHash;
+	const correctIndex = lastBlock['index'] + 1 === newBlock['index'];
+
+	if(correctHash && correctIndex){
+		bitcoin.chain.push(newBlock);
+		bitcoin.pendingTransactions  = [];
+
+		res.json({
+			note: "Block added to chain successfully",
+			newBlock: newBlock
+		});
+
+	}else{
+		res.json({
+			note: 'New block rejected',
+			newBlock: newBlock
+		})
+	}
 });
 
 //register a node and broadcast that in the network
