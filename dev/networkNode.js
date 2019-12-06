@@ -65,7 +65,7 @@ app.get('/mine', function(req, res){
 	const requestPromises = [];
 	bitcoin.networkNodes.forEach(networkNodeUrl => {
 		const requestOptions = {
-			url: networkNodeUrl + '/receive-new-block',
+			uri: networkNodeUrl + '/receive-new-block',
 			method: 'POST',
 			body: { newBlock : newBlock },
 			json: true
@@ -100,7 +100,7 @@ app.get('/mine', function(req, res){
 app.get('/receive-new-block', function(req, res){
 	const newBlock = req.body.newNodeUrl;
 	const lastBlock = bitocin.getLastBlock();
-	const correctHash = lastBlock.hash === newBlock.prevBlockHash;
+	const correctHash = lastBlock.hash === newBlock.previousBlockHash;
 	const correctIndex = lastBlock['index'] + 1 === newBlock['index'];
 
 	if(correctHash && correctIndex){
@@ -113,6 +113,7 @@ app.get('/receive-new-block', function(req, res){
 		});
 
 	}else{
+
 		res.json({
 			note: 'New block rejected',
 			newBlock: newBlock
