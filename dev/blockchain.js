@@ -98,7 +98,7 @@ Blockchain.prototype.chainIsValid = function(blockchain) {
 	}
 
 	return validChain;
-}
+};
 
 Blockchain.prototype.getBlock = function(blockHash){
 	let correctBlock = null;
@@ -106,6 +106,52 @@ Blockchain.prototype.getBlock = function(blockHash){
 		if(block.hash === blockHash) correctBlock = block;
 	});
 	return correctBlock;
+};
+
+Blockchain.prototype.getTransactionBlock = function(transactionId){
+	let correctBlock = null;
+	let correctTransaction = null;
+	// this.chain.forEach(idBlock => {
+	// 	if(idBlock.transactions.transactionId === transactionId){
+	// 		correctBlock = idBlock;
+	// 		//correctTransaction = transactions;
+	// 	}
+	// });
+	//or
+	this.chain.forEach(idBlock => {
+		idBlock.transactions.forEach(transaction => {
+			if(transaction.transactionId === transactionId){
+				correctTransaction = transaction;
+				correctBlock = idBlock;
+			} 
+		});
+	});
+	return {
+		transaction: correctTransaction,
+		block: correctBlock
+	}
+};
+
+Blockchain.prototype.getAddressData = function(address){
+	const addressTransactions = [];
+	this.chain.forEach(block => {
+		block.transactions.forEach(transaction => {
+			if(transaction.sender === address || transaction.recepient === address){
+				addressTransactions.push(transaction);
+			};
+		});
+	});
+
+	let balance = 0;
+	addressTransactions.forEach(transaction => {
+		if(transaction.recepient === address) balance += transaction.amount;
+		else if(transaction.sender === address) balance -= transaction.amount;
+	})
+
+	return {
+		addressTransactions: addressTransactions,
+		addressBalance: balance
+	}
 };
 
 module.exports = Blockchain;
