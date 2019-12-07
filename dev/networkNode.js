@@ -226,7 +226,12 @@ app.get('/consensus', function(req, res){
 });
 
 app.get('/block/:blockhash', function(req, res){
-
+	const blockHash = req.params.blockHash;
+	const correctBlock = bitcoin.getBlock(blockHash);
+	res.json({
+		note: "Block Property",
+		block: correctBlock
+	});
 });
 
 app.get('transaction/:transactionId', function(req, res){
