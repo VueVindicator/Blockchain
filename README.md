@@ -1,3 +1,4 @@
+##Blockchain application
 This is a short project on blockchain that features the following
 1. Understanding how the blockchain works
 2. Creating nodes on the network and syncing them using express.js
